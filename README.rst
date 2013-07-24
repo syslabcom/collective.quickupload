@@ -5,6 +5,8 @@
 Plone Quick Upload
 ==================
 
+test
+
 Description
 ===========
 This product offers a multiple files upload tool for Plone, with multi
