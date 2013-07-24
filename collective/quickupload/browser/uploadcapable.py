@@ -25,6 +25,7 @@ from Acquisition import aq_inner
 from zope import interface
 from zope import component
 from zope.event import notify
+from staralliance.theme.groupings import IGroupingStorage
 
 try:
     from zope.app.container.interfaces import INameChooser
@@ -67,7 +68,7 @@ class QuickUploadCapableFileFactory(object):
     def __init__(self, context):
         self.context = aq_inner(context)
 
-    def __call__(self, filename, title, description, content_type, data, portal_type):
+    def __call__(self, filename, title, description, content_type, data, portal_type, tags, comment):
         context = aq_inner(self.context)
         error = ''
         result = {}
@@ -118,7 +119,9 @@ class QuickUploadCapableFileFactory(object):
                         except AttributeError:
                             pass
                         del obj._at_rename_after_creation
-
+                    obj.setSubject(tags)
+                    gs = IGroupingStorage(self.context)
+                    gs._add_grouping_values('label', tags, obj)
                 #@TODO : rollback if there has been an error
                 transaction.commit()
             finally:

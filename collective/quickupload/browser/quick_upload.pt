@@ -16,10 +16,10 @@
           tal:content="view/header_upload">
         <tal:comment replace="nothing">Files Quick Upload</tal:comment>
       </h4>
-      <label tal:condition="view/can_drag_and_drop" 
+      <label tal:condition="view/can_drag_and_drop"
              i18n:translate="label_choose_your_files"
              id="label-upload">Drag and drop or choose your files:</label>
-      <label tal:condition="not:view/can_drag_and_drop" 
+      <label tal:condition="not:view/can_drag_and_drop"
              i18n:translate="label_choose_your_files_nodrag"
              id="label-upload">Choose your files:</label>
       <!-- uploader comes here -->
@@ -37,6 +37,12 @@
              i18n:domain="plone"
              value="Description"
              i18n:attributes="value Description" />
+      <input type="hidden"
+             id="uploadify_label_file_tags"
+             value="Tag(s) - separate with comma" />
+      <input type="hidden"
+             id="uploadify_label_file_comment"
+             value="Comment" />
       <div class="uploadifybuttons">
         <input type="button"
                id="uploadify-upload"

@@ -224,10 +224,12 @@ class QuickUploadView(BrowserView):
 XHR_UPLOAD_JS = """
     var fillTitles = %(ul_fill_titles)s;
     var fillDescriptions = %(ul_fill_descriptions)s;
+    var fillTags = %(ul_fill_tags)s;
+    var fillComment = %(ul_fill_comment)s;
     var auto = %(ul_auto_upload)s;
     addUploadFields_%(ul_id)s = function(file, id) {
         var uploader = xhr_%(ul_id)s;
-        PloneQuickUpload.addUploadFields(uploader, uploader._element, file, id, fillTitles, fillDescriptions);
+        PloneQuickUpload.addUploadFields(uploader, uploader._element, file, id, fillTitles, fillDescriptions, fillTags, fillComment);
     }
     sendDataAndUpload_%(ul_id)s = function() {
         var uploader = xhr_%(ul_id)s;
@@ -282,6 +284,8 @@ XHR_UPLOAD_JS = """
 FLASH_UPLOAD_JS = """
     var fillTitles = %(ul_fill_titles)s;
     var fillDescriptions = %(ul_fill_descriptions)s;
+    var fillTags = %(ul_fill_tags)s;
+    var fillComment = %(ul_fill_comment)s;
     var autoUpload = %(ul_auto_upload)s;
     clearQueue_%(ul_id)s = function() {
         jQuery('#%(ul_id)s').uploadifyClearQueue();
@@ -289,7 +293,9 @@ FLASH_UPLOAD_JS = """
     addUploadifyFields_%(ul_id)s = function(event, data ) {
         if ((fillTitles || fillDescriptions) && !autoUpload)  {
             var labelfiletitle = jQuery('#uploadify_label_file_title').val();
-            var labelfiledescription = jQuery('#uploadify_label_file_description').val();
+            var labelfiledescription = "Desc code"
+            var labelfilecomment = 'Comment manual';
+            var labelfilettag = 'Tags manual';
             jQuery('#%(ul_id)sQueue .uploadifyQueueItem').each(function() {
                 ID = jQuery(this).attr('id').replace('%(ul_id)s','');
                 if (!jQuery('.uploadField' ,this).length) {
@@ -309,9 +315,29 @@ FLASH_UPLOAD_JS = """
                                  value="" />\
                       </div>\
                   ');
+                  if (fillComment) jQuery('.cancel' ,this).after('\
+                      <div class="uploadField">\
+                          <label>' + labelfilecomment + ' : </label> \
+                          <textarea rows="2" \
+                                 class="file_comment_field" \
+                                 id="comment_' + ID + '" \
+                                 name="description" \
+                                 value="" />\
+                      </div>\
+                  ');
+                  if (fillTags) jQuery('.cancel' ,this).after('\
+                      <div class="uploadField">\
+                          <label>' + labelfilettag + ' : </label> \
+                          <input type="text" \
+                                 class="file_tag_field" \
+                                 id="tag_' + ID + '" \
+                                 name="title" \
+                                 value="" />\
+                      </div>\
+                  ');
                   if (fillTitles) jQuery('.cancel' ,this).after('\
                       <div class="uploadField">\
-                          <label>' + labelfiletitle + ' : </label> \
+                          <label>TITLE from quickupload </label> \
                           <input type="text" \
                                  class="file_title_field" \
                                  id="title_' + ID + '" \
@@ -456,6 +482,8 @@ class QuickUploadInit(BrowserView):
             ul_id                  = self.uploader_id,
             ul_fill_titles         = self.qup_prefs.fill_titles and 'true' or 'false',
             ul_fill_descriptions   = self.qup_prefs.fill_descriptions and 'true' or 'false',
+            ul_fill_tags           = self.qup_prefs.fill_tags and 'true' or 'false',
+            ul_fill_comment        = self.qup_prefs.fill_comment and 'true' or 'false',
             ul_auto_upload         = self.qup_prefs.auto_upload and 'true' or 'false',
             ul_size_limit          = self.qup_prefs.size_limit and str(self.qup_prefs.size_limit*1024) or '',
             ul_xhr_size_limit      = self.qup_prefs.size_limit and str(self.qup_prefs.size_limit*1024) or '0',
@@ -688,6 +716,9 @@ class QuickUploadFile(QuickUploadAuthenticate):
         portal_type = getDataFromAllRequests(request, 'typeupload') or ''
         title =  getDataFromAllRequests(request, 'title') or ''
         description =  getDataFromAllRequests(request, 'description') or ''
+        tags = getDataFromAllRequests(request, 'tags') or ''
+        tags = list(set([x.strip() for x in tags.split(',')]))
+        comment = getDataFromAllRequests(request, 'comment') or ''
 
         if not portal_type :
             ctr = getToolByName(context, 'content_type_registry')
@@ -697,7 +728,7 @@ class QuickUploadFile(QuickUploadAuthenticate):
             if overwritten_file is not None:
                 updater = IQuickUploadFileUpdater(context)
                 logger.info("reuploading %s file with %s : title=%s, description=%s, content_type=%s" % \
-                        (overwritten_file.absolute_url(), upload_with, title, description, content_type))
+                        (overwritten_file.absolute_url(), upload_with, title, description, content_type, tags, comment))
                 try :
                     f = updater(overwritten_file, file_name, title,
                                 description, content_type, file_data)
@@ -710,10 +741,11 @@ class QuickUploadFile(QuickUploadAuthenticate):
                 logger.info("uploading file with %s : filename=%s, title=%s, description=%s, content_type=%s, portal_type=%s" % \
                         (upload_with, file_name, title, description, content_type, portal_type))
                 try :
-                    f = factory(file_name, title, description, content_type, file_data, portal_type)
+                    f = factory(file_name, title, description, content_type, file_data, portal_type, tags, comment)
                 except Exception, e:
                     logger.error("Error creating %s file : %s", file_name, str(e))
                     return json.dumps({u'error': u'serverError'})
+
 
             if f['success'] is not None :
                 o = f['success']

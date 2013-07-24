@@ -6,11 +6,37 @@
 
 var PloneQuickUpload = {};
 
-PloneQuickUpload.addUploadFields = function(uploader, domelement, file, id, fillTitles, fillDescriptions) {
+PloneQuickUpload.addUploadFields = function(uploader, domelement, file, id, fillTitles, fillDescriptions, fillTags, fillComment) {
     var blocFile;
     if (fillTitles || fillDescriptions)  {
         blocFile = uploader._getItemByFileId(id);
         if (typeof id == 'string') id = parseInt(id.replace('qq-upload-handler-iframe',''));
+    }
+    if (fillComment)  {
+        var labelfillcomment = jQuery('#uploadify_label_file_comment').val();
+        jQuery('.qq-upload-cancel', blocFile).after('\
+                  <div class="uploadField">\
+                      <label>' + labelfillcomment + '&nbsp;:&nbsp;</label> \
+                      <textarea rows="2" \
+                             class="file_comment_field" \
+                             id="comment_' + id + '" \
+                             name="comment" \
+                             value="" />\
+                  </div>\
+                   ')
+    }
+    if (fillTags)  {
+        var labelfilletags = jQuery('#uploadify_label_file_tags').val();
+        jQuery('.qq-upload-cancel', blocFile).after('\
+                  <div class="uploadField">\
+                      <label>' + labelfilletags + '&nbsp;:&nbsp;</label> \
+                      <input type="text" \
+                             class="file_tags_field" \
+                             id="tags_' + id + '" \
+                             name="tags" \
+                             value="" />\
+                  </div>\
+                   ')
     }
     if (fillDescriptions)  {
         var labelfiledescription = jQuery('#uploadify_label_file_description').val();
@@ -65,7 +91,15 @@ PloneQuickUpload.sendDataAndUpload = function(uploader, domelement, typeupload) 
             if (fillDescriptions)  {
                 file_description = jQuery('.file_description_field', fileContainer).val();
             }
-            uploader._queueUpload(id, {'title': file_title, 'description': file_description, 'typeupload' : typeupload});
+            var file_tags = '';
+            if (fillTags)  {
+                file_tags = jQuery('.file_tags_field', fileContainer).val();
+            }
+            var file_comment = '';
+            if (fillComment)  {
+                file_comment = jQuery('.file_comment_field', fileContainer).val();
+            }
+            uploader._queueUpload(id, {'title': file_title, 'description': file_description, 'typeupload' : typeupload, 'tags': file_tags, 'comment': file_comment});
         }
         // if file is null for any reason jq block is no more here
         else missing++;

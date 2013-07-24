@@ -56,8 +56,19 @@ class IQuickUploadControlPanel(Interface):
                                                 "before upload. Uncheck if you don't need titles."),
                                  default=True,
                                  required=False)
+    fill_tags = Bool(title=_(u"title_fill_tags", default=u"Fill tag(s) before upload"),
+                                 description=_(u"description_fill_tags", default=u"If checked, you can fill the files' tag(s) "
+                                                "before upload. Uncheck if you don't need tags."),
+                                 default=True,
+                                 required=False)
 
     fill_descriptions = Bool(title=_(u"title_fill_descriptions", default=u"Fill description before upload"),
+                                 description=_(u"description_fill_descriptions", default=u"If checked, you can fill the files descriptions "
+                                                "before upload. Uncheck if you don't need descriptions."),
+                                 default=False,
+                                 required=False)
+
+    fill_comment = Bool(title=_(u"title_fill_comment", default=u"Fill Comment before upload"),
                                  description=_(u"description_fill_descriptions", default=u"If checked, you can fill the files descriptions "
                                                 "before upload. Uncheck if you don't need descriptions."),
                                  default=False,
@@ -125,6 +136,14 @@ class QuickUploadControlPanelAdapter(SchemaAdapterBase):
 
     fill_titles = property(get_fill_titles, set_fill_titles)
 
+    def get_fill_tags(self):
+        return self.quProps.getProperty('fill_tags')
+
+    def set_fill_tags(self, value):
+        self.quProps._updateProperty('fill_tags', value)
+
+    fill_tags = property(get_fill_tags, set_fill_tags)
+
     def get_fill_descriptions(self):
         return self.quProps.getProperty('fill_descriptions')
 
@@ -132,6 +151,14 @@ class QuickUploadControlPanelAdapter(SchemaAdapterBase):
         self.quProps._updateProperty('fill_descriptions', value)
 
     fill_descriptions = property(get_fill_descriptions, set_fill_descriptions)
+
+    def get_fill_comment(self):
+        return self.quProps.getProperty('fill_comment')
+
+    def set_fill_comment(self, value):
+        self.quProps._updateProperty('fill_comment', value)
+
+    fill_comment = property(get_fill_comment, set_fill_comment)
 
     def get_size_limit(self):
         return self.quProps.getProperty('size_limit')

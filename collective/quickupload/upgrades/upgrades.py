@@ -33,3 +33,15 @@ def v4_v5(context):
         qu_props._setProperty('show_upload_action', False, 'boolean')
     context.runImportStepFromProfile(
         'profile-collective.quickupload:default', 'actions')
+
+
+def v5_v6(context):
+        #Add property to quickupload property sheet
+    ptool = getToolByName(context, 'portal_properties')
+    qu_props = ptool.get('quickupload_properties')
+    if not qu_props.hasProperty('fill_tags'):
+        qu_props._setProperty('fill_tags', False, 'boolean')
+    if not qu_props.hasProperty('fill_comment'):
+        qu_props._setProperty('fill_comment', False, 'boolean')
+    context.runImportStepFromProfile(
+        'profile-collective.quickupload:default', 'actions')
