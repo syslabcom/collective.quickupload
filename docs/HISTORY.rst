@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.6.1-star-2 (unreleased)
+1.6.1-star-2 (2013-08-07)
 -------------------------
 
 - Nothing changed yet.
